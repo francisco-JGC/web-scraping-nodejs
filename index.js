@@ -1,11 +1,20 @@
 const { chromium } = require('playwright')
+const { SHOPS_SITES } = require('./sites')
 
-;(async () => {
+async function main() {
   const browser = await chromium.launch()
-  const page = await browser.newPage()
-  await page.goto('https://www.xbox.com/es-es/configure/8WJ714N3RBTL')
+  const context = await browser.newContext()
+  const page = await context.newPage()
 
-  await page.screenshot({ path: 'xbox.png' })
+  for (const site of SHOPS_SITES) {
+    await page.goto(site.url)
+    const isAvailable = await site.checkStock({ page })
+    if (isAvailable) {
+      console.log(`${site.vendor} is available!`)
+    }
+  }
 
   await browser.close()
-})()
+}
+
+main()
